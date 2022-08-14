@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 interface Props {
   items: {
@@ -8,25 +8,44 @@ interface Props {
 }
 
 export default function Accordion({ items }: Props) {
-  const [currentId, setCurrentId] = useState(0);
+  const [active, setActive] = useState(false);
+  const [height, setHeight] = useState('0px');
+  const [rotate, setRotate] = useState('transform duration-700 ease');
+
+  const contentSpace = useRef(null);
+
+  function toggleAccordion() {
+    setActive((prevState) => !prevState);
+    // @ts-ignore
+    setHeight(active ? '0px' : `${contentSpace.current.scrollHeight}px`);
+    setRotate(
+      active
+        ? 'transform duration-700 ease'
+        : 'transform duration-700 ease rotate-180'
+    );
+  }
 
   return (
-    <div>
+    <>
       {items.map((item, key) => {
         return (
-          <div>
+          <div className="flex flex-col">
             <button
-              onClick={() => {
-                setCurrentId(key);
-                console.log(key);
-              }}
+              className=" flex items-center justify-between"
+              onClick={toggleAccordion}
             >
-              {item.key}
+              <p className="inline-block text-footnote light">{item.key}</p>
             </button>
-            {currentId === key ? <p>test</p> : null}
+            <div
+              ref={contentSpace}
+              style={{ maxHeight: `${height}` }}
+              className="overflow-auto transition-max-height duration-700 ease-in-out"
+            >
+              <div className="">{item.item}</div>
+            </div>
           </div>
         );
       })}
-    </div>
+    </>
   );
 }
